@@ -1,20 +1,114 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>IonicCoin</ion-title>
+    <ion-badge slot="end" [color]="isOffline ? 'danger' : 'success'" class="ion-margin-end">
+      {{ isOffline ? 'Offline' : 'Online' }}
+    </ion-badge>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+<ion-content [fullscreen]="true" class="ion-padding">
+  
+  <div class="ion-text-center ion-margin-bottom">
+    <h2>Conversão de Moedas em Tempo Real</h2>
+    <p>Consulte taxas globais atualizadas e faça conversões instantâneas.</p>
   </div>
+
+  <ion-card>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row align-items-center>
+          <ion-col size="12" size-md="5">
+            <ion-item>
+              <ion-label position="stacked">Moeda de Origem</ion-label>
+             <ion-select [(ngModel)]="fromCurrency" (ionChange)="loadRatesAndConvert()">
+                <ion-select-option *ngFor="let c of currencies" [value]="c.code">
+                  {{ c.flag }} {{ c.code }} - {{ c.name }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item class="ion-margin-top">
+              <ion-label position="stacked">Valor</ion-label>
+              <ion-input type="number" [(ngModel)]="amount" (ionInput)="loadRatesAndConvert()"></ion-input>
+            </ion-item>
+          </ion-col>
+
+          <ion-col size="12" size-md="2" class="ion-text-center ion-align-self-center">
+            <ion-button fill="clear" color="secondary" (click)="invertCurrencies()">
+              <ion-icon slot="icon-only" name="swap-horizontal-outline" size="large"></ion-icon>
+            </ion-button>
+          </ion-col>
+
+          <ion-col size="12" size-md="5">
+            <ion-item>
+              <ion-label position="stacked">Moeda de Destino</ion-label>
+              <ion-select [(ngModel)]="toCurrency" (ionChange)="loadRatesAndConvert()">
+                <ion-select-option *ngFor="let c of currencies" [value]="c.code">
+                  {{ c.flag }} {{ c.code }} - {{ c.name }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+            
+            <div class="ion-margin-top ion-padding-start result-box" *ngIf="result !== null">
+              <ion-note>Resultado Convertido</ion-note>
+              <h1>{{ result | currency:toCurrency:'symbol':'1.2-2' }}</h1>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="historicalVariation.length > 0">
+    <ion-card-header>
+      <ion-card-title style="font-size: 1.1rem;">Variação Estimada da Taxa (Últimos 30 Dias)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="graph-container">
+        <div class="graph-bar-row" *ngFor="let data of historicalVariation">
+          <span class="graph-label">{{ data.day }}:</span>
+          <div class="graph-bar-wrapper">
+            <div class="graph-bar" [style.width.%]="(data.value / rates[toCurrency]) * 80"></div>
+          </div>
+          <span class="graph-value">{{ data.value | number:'1.4-4' }}</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title style="font-size: 1.1rem;">Opções de Configuração</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label>Frequência de Atualização</ion-label>
+        <ion-select [(ngModel)]="updateFrequency">
+          <ion-select-option value="always">A cada conversão</ion-select-option>
+          <ion-select-option value="hourly">A cada hora</ion-select-option>
+          <ion-select-option value="daily">Diariamente</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title style="font-size: 1.1rem;">Histórico Recente (Local)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list lines="inset" *ngIf="historyList.length > 0; else noHistory">
+        <ion-item *ngFor="let h of historyList | slice:0:5">
+          <ion-label>
+            <h2>{{ h.amount }} {{ h.from }} → {{ h.result | number:'1.2-2' }} {{ h.to }}</h2>
+            <p>Horário da consulta: {{ h.date }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <ng-template #noHistory>
+        <p class="ion-text-center">Nenhuma conversão realizada ainda.</p>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>
