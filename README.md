@@ -55,7 +55,7 @@ Rode o comando mágico para compilar o projeto e abrir o app direto no seu naveg
 ionic serve
 ```
 
-O aplicativo vai surgir magicamente na sua tela no endereço: `http://localhost:8100` 🌟
+O aplicativo vai surgir magicamente na sua tela no endereço: `http://localhost:8100 ou http://localhost:8100/home` 🌟
 
 ---
 
