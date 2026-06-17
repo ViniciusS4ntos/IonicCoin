@@ -1,0 +1,7 @@
+{
+  "name": "IonicCoin",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
